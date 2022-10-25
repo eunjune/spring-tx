@@ -47,4 +47,39 @@ public class BasicTxTest {
         txManager.rollback(status);
         log.info("트랜잭션 롤백 완료");
     }
+
+    @Test
+    public void double_commit() {
+        // Acquired Connection [HikariProxyConnection@1064414847 wrapping conn0] for JDBC transaction
+        log.info("트랜잭션1 시작");
+        TransactionStatus tx1 = txManager.getTransaction(new DefaultTransactionAttribute());
+        // Releasing JDBC Connection [HikariProxyConnection@1064414847 wrapping conn0] after transaction
+        log.info("트랜잭션1 커밋");
+        txManager.commit(tx1);
+
+        // Acquired Connection [HikariProxyConnection@ 778350106 wrapping conn0] for JDBC transaction
+        log.info("트랜잭션2 시작");
+        TransactionStatus tx2 = txManager.getTransaction(new DefaultTransactionAttribute());
+        // Releasing JDBC Connection [HikariProxyConnection@ 778350106 wrapping conn0] after transaction
+        log.info("트랜잭션2 커밋");
+        txManager.commit(tx2);
+
+        /*
+        * 둘은 다른 커넥션이지만 conn0라는 이름은 같다. 같은 이유는 물리 커넥션은 재사용이 된 것이고 대신 conn0을 감싸는 것은 참조 값이 다르다
+        *
+        * */
+    }
+
+    @Test
+    public void double_rollback() {
+        log.info("트랜잭션1 시작");
+        TransactionStatus tx1 = txManager.getTransaction(new DefaultTransactionAttribute());
+        log.info("트랜잭션1 커밋");
+        txManager.commit(tx1);
+
+        log.info("트랜잭션2 시작");
+        TransactionStatus tx2 = txManager.getTransaction(new DefaultTransactionAttribute());
+        log.info("트랜잭션2 롤백");
+        txManager.rollback(tx2);
+    }
 }
