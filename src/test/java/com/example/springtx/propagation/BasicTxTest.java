@@ -82,4 +82,24 @@ public class BasicTxTest {
         log.info("트랜잭션2 롤백");
         txManager.rollback(tx2);
     }
+
+    @Test
+    public void inner_commit() {
+        log.info("외부 트랜잭션 시작");
+        TransactionStatus outer = txManager.getTransaction(new DefaultTransactionAttribute());
+        log.info("outer.isNewTransaction()={}", outer.isNewTransaction()); // true
+
+        /*
+        * 내부 트랜잭션 로그를 보면 시작,커밋 한다는 로그는 확인할 수 없다
+        * 즉 실제 물리 트랜잭션 관리는 외부 트랜잭션만 한다는 뜻
+        * */
+        log.info("내부 트랜잭션 시작");
+        TransactionStatus inner = txManager.getTransaction(new DefaultTransactionAttribute());
+        log.info("inner.isNewTransaction()={}", inner.isNewTransaction()); // false
+        log.info("내부 트랜잭션 커밋");
+        txManager.commit(inner);
+
+        log.info("외부 트랜잭션 커밋");
+        txManager.commit(outer);
+    }
 }
