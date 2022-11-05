@@ -117,6 +117,23 @@ class MemberServiceTest {
         assertThatThrownBy(() -> memberService.joinV2(username))
                 .isInstanceOf(UnexpectedRollbackException.class);
 
+        Assertions.assertTrue(memberRepository.find(username).isEmpty());
+        Assertions.assertTrue(logRepository.find(username).isEmpty());
+    }
+
+    /**
+     * memberService    @Transactional:ON
+     * memberRepository @Transactional:ON
+     * logRepository    @Transactional:ON(REQUIRES_NEW) Exception
+     */
+    @Test
+    public void recoverException_success() {
+
+        // given
+        String username = "로그예외_recoverException_success";
+
+        memberService.joinV2(username);
+
         Assertions.assertTrue(memberRepository.find(username).isPresent());
         Assertions.assertTrue(logRepository.find(username).isEmpty());
     }
