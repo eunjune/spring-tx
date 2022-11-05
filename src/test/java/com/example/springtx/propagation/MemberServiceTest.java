@@ -59,7 +59,23 @@ class MemberServiceTest {
     @Test
     public void singleTx() {
 
-        String username = "outerTxOff_success";
+        String username = "singleTx";
+
+        memberService.joinV1(username);
+
+        Assertions.assertTrue(memberRepository.find(username).isPresent());
+        Assertions.assertTrue(logRepository.find(username).isPresent());
+    }
+
+    /**
+     * memberService    @Transactional:ON
+     * memberRepository @Transactional:ON
+     * logRepository    @Transactional:ON
+     */
+    @Test
+    public void outerTxOn_success() {
+
+        String username = "outerTxOn_success";
 
         memberService.joinV1(username);
 
